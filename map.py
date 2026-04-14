@@ -1,6 +1,6 @@
 import numpy as np
 import random
-import entity
+from entity import Person, Enemy
 
 class Map:
     def __init__(self, height, width):
@@ -29,7 +29,7 @@ class Map:
             x = random.randint(1, self.width-2) #массивы с 0
             y = random.randint(1, self.height-2)
             if self.dungeon[y, x] == '.':
-                self.dungeon[y, x] = object.char
+                self.dungeon[y, x] = object.symbol
                 object.x = x
                 object.y = y
                 plased = True
@@ -44,7 +44,7 @@ class Map:
                 x = random.randint(1, self.width-2) #массивы с 0
                 y = random.randint(1, self.height-2)
                 if self.dungeon[y, x] == '.':
-                    self.dungeon[y, x] = object.char
+                    self.dungeon[y, x] = object.symbol
                     object.x = x
                     object.y = y
                     if object.is_enemy:
@@ -56,12 +56,10 @@ class Map:
 
     def add_block(self):
         block = '█'
-        self.dungeon[:, 0:1] = block
-        self.dungeon[:, 0] = block
-        self.dungeon[0, -1] = '■'
-        self.dungeon[0, :] = '■'
-        self.dungeon[-1, :] = '■'
-        self.dungeon[self.height-1:self.height, self.width-1:self.width] = '■'
+        self.dungeon[:, 0] = block    # левый край
+        self.dungeon[:, -1] = block   # правый край
+        self.dungeon[0, :] = '■'    # верхний край
+        self.dungeon[-1, :] = '■'   # нижний край
 
 
     #функция, которая ставит рандомно блоки в заданном диапозоне
@@ -195,8 +193,8 @@ class Map:
 
 # нужно 5 мобов
 p = Person(14, 15)
-m = Map(45, 11)
-mobs = Mob.generation_mobs(15, m)
+m = Map(11, 45)
+mobs = Enemy.generation_mobs(15, m)
 m.add_player(p) 
 m.add_something(mobs) 
 m.add_block()

@@ -92,7 +92,8 @@ class Person(Entity):
 class Enemy(Entity):
     def __init__(self, x=1, y=1):
         # Враг: символ 'Z', 50 HP, 3 урона
-        super().__init__('Z', max_hp = 50, attack_damage = 3, x=x, y=y)
+        health = random.randint(20,70)
+        super().__init__('Z', health, attack_damage = 3, x=x, y=y)
 
     #Движение в сторону игрока
     def move_towards_player(self, player_x, player_y, MAP):
@@ -119,7 +120,7 @@ class Enemy(Entity):
 
         # Проверяем, можно ли пройти в выбранную клетку
         if 0 <= new_x < MAP.width and 0 <= new_y < MAP.height:
-            if MAP.dungeon[new_y][new_x] = '.':
+            if MAP.dungeon[new_y][new_x] == '.':
                 self.move(new_x, new_y)
                 return True
 
@@ -158,8 +159,7 @@ class Enemy(Entity):
     def generation_mobs(cls, count, MAP):
         lst_mob = []
         for i in range(count):
-            cls.health = random.randint(10, 50)
             x = random.randint(1, MAP.width - 2)
             y = random.randint(1, MAP.height - 2)
-            lst_mob.append(cls(cls.health, y, x))
+            lst_mob.append(cls(x, y))
         return lst_mob
