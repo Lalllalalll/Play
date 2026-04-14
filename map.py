@@ -1,9 +1,11 @@
 import numpy as np
 import random
+import entity
+
 class Map:
-    def __init__(self, width, height):
-        self.width = width
+    def __init__(self, height, width):
         self.height = height
+        self.width = width
         self.dungeon = np.full((self.height, self.width), '■') #строка - y, столбец - x
         self.dungeon[1:self.height-1, 1:self.width-1] = '.'
         self.player = None
@@ -37,7 +39,7 @@ class Map:
     def add_something(self, objects_list):
         #ДОРАБОТАТь, что, если свободного пространства НЕТ
         plased = False
-        for object in objects_list:
+        for object in objects_list[:]: #чтобы можно было убирать элементы, перебираем копию списка, но удаляем из самого списка
             for i in range(100): #100 попыток на создание
                 x = random.randint(1, self.width-2) #массивы с 0
                 y = random.randint(1, self.height-2)
@@ -45,17 +47,20 @@ class Map:
                     self.dungeon[y, x] = object.char
                     object.x = x
                     object.y = y
-                    self.enemies.append(object)
+                    if object.is_enemy:
+                        self.enemies.append(object)
+                    else:
+                        self.item.append(object)
                     plased = True
                     break
 
     def add_block(self):
         block = '█'
         self.dungeon[:, 0:1] = block
-        self.dungeon[:, self.width-1:self.width] = block
-        self.dungeon[0, self.width-1:self.width] = '■'
-        self.dungeon[0, 0] = '■'
-        self.dungeon[self.height-1:self.height, 0] = '■'
+        self.dungeon[:, 0] = block
+        self.dungeon[0, -1] = '■'
+        self.dungeon[0, :] = '■'
+        self.dungeon[-1, :] = '■'
         self.dungeon[self.height-1:self.height, self.width-1:self.width] = '■'
 
 
@@ -78,16 +83,47 @@ class Map:
             return False
         return True
     
+    #бой персонажа, стирание координат, если моб или персон умер 
+    def battle_p_e(self):
+        for enem in self.enemies[:]:
+            if enem.x == self.player.x and enem.y == self.player.y:
+                enem.attack(self.player)
+                self.player.attack(enem)
+                if enem.is_alive() == False:
+                    self.delection_player(enem)
+                    self.enemies.remove(enem)
+                if self.player.is_alive() == False:
+                    self.delection_player(self.player)
+
+    #функция стирания координат зелек
+    def deletion(self):
+        for it in self.item[:]: 
+            if it.x == self.player.x and it.y == self.player.y:
+                self.player.heal(amount = 10)
+                self.dungeon[it.y, it.x] = '.'
+                self.item.remove(it)
+            else:
+                return
+
     #движение списка мобов
+    def movement_mob(self):
+        if self.player == None:
+            return
+        for enemy in self.enemies:
+            old_x = enemy.x
+            old_y = enemy.y
+            moved = enemy.move_towards_player(self.player.x, self.player.y, self)
+            if moved:
+                self.dungeon[old_y, old_x] = '.'
+                self.dungeon[enemy.y, enemy.x] = enemy.symbol
+
+
     #удаление мёртвых игроков
-    #загрузить на гитхаб
-    #2 уровень. Использование файлов для настроек игры 
-    #условие проигрыша
-    #2 уровень. Поле зрения у врагов
-    #класс ИГРЫ: Пошаговый режим, с возможностью на каждом шаге игроком совершить действие,
-    #воплотить саму игру или класс игры???
-    #функция, которая сравнивает координаты врага и игрока, игрока и зельки. \
-    # зелька убирается, мобы стираются с карты. Бой в самой карте или как отдельная функция в самой игре? (Алина - игра)
+    def delection_player(self, obj):
+        if obj.is_alive() == False:
+            self.dungeon[obj.y, obj.x] = '.' 
+        else:
+            return
 
     #нажимаем на w, a, d, s - движение вверх, вправо, влево, вниз
     def movement_player(self, object):
@@ -141,243 +177,21 @@ class Map:
 
 
     #функция, которая генерирует карту с рандомными width и height
-    def create_map(self):
+    @classmethod
+    def create_map(cls):
         width = random.randint(10, 30)
         height = random.randint(45, 60)
-        return Map(height, width)
-
-
-class Entity:
-    def __init__(self, name, char, health, y, x):
-        self.name = name
-        self.char = char
-        self.health = health
-        self.y = y
-        self.x = x
-
-    def __str__(self):
-        return self.char
+        return cls(height, width)
     
 
-class Person(Entity):
-    def __init__(self, y, x):
-        super().__init__('Игрок', '@', 100, y, x)
+# Логика:
+#1)2 уровень. Использование файлов для настроек игры 
+#2)условие проигрыша
+#3)2 уровень. Поле зрения у врагов
+#4)класс ИГРЫ: Пошаговый режим, с возможностью на каждом шаге игроком совершить действие,
+#5)функция, которая сравнивает координаты врага и игрока, игрока и зельки. \
+#6)Бой в самой карте или как отдельная функция в самой игре? 
 
-class Mob(Entity):
-    def __init__(self, y, x, health = 50):
-        super().__init__('Зомби', 'Z', health, y, x)
-
-    #функция, которая создаёт монстров в фиксированном значении
-    @classmethod
-    def generation_mobs(cls, count, MAP):
-        lst_mob = []
-        for i in range(count):
-            cls.health = random.randint(10, 50)
-            x = random.randint(1, MAP.width - 2)
-            y = random.randint(1, MAP.height - 2)
-            lst_mob.append(cls(cls.health, y, x))
-        return lst_mob
-
-# class Player:
-#     def __init__(self, symbol, max_hp, attack_damage, x=1, y=1):
-#         """Конструктор персонажа
-#         Args:
-#             symbol: символ отображения ('@', 'G', 'O' и т.д.)
-#             max_hp: максимальное здоровье
-#             attack_damage: сила атаки
-#             x: координата X на карте
-#             y: координата Y на карте"""
-#         self.symbol = symbol  # символ для отображения
-#         self.max_hp = max_hp  # максимальное HP
-#         self.hp = max_hp  # текущее HP (начинаем с максимума)
-#         self.attack_damage = attack_damage  # сила атаки
-#         self.x = x  # позиция по X
-#         self.y = y  # позиция по Y
-#         self.alive = True  # жив ли персонаж
-
-#     def __str__(self):
-#         """Строковое представление для вывода"""
-#         return f"{self.symbol} HP:{self.hp}/{self.max_hp} ATK:{self.attack_damage}"
-
-#     def __repr__(self):
-#         """Короткое представление для отладки"""
-#         return self.symbol
-
-#     def move(self, new_x, new_y):
-#         """Перемещение персонажа на новые координаты
-#         Args:
-#             new_x: новая координата X
-#             new_y: новая координата Y"""
-#         self.x = new_x
-#         self.y = new_y
-
-#     def take_damage(self, damage):
-#         """Получение урона
-#         Args:
-#             damage: количество урона
-#         Returns:
-#             bool: True если персонаж умер, False если выжил"""
-#         self.hp -= damage
-
-#         if self.hp <= 0:
-#             self.hp = 0
-#             self.alive = False
-#             return True  # персонаж умер
-
-#         return False  # персонаж выжил
-
-#     def attack(self, target):
-#         """Функция и врага, и персонажа
-#         Args:
-#             target: цель атаки (другой объект Person)
-#         Returns:
-#             tuple: (target_died, message)
-#             target_died: bool - умерла ли цель
-#             message: str - описание атаки"""
-#         # Нельзя атаковать себя
-#         if self == target:
-#             return False, "Нельзя атаковать себя!"
-
-#         # Наносим урон цели
-#         damage = self.attack_damage #сила атаки
-#         target_died = target.take_damage(damage)
-
-#         # Формируем сообщение
-#         message = f"{self.symbol} атакует {target.symbol} и наносит {damage} урона!"
-
-#         if target_died:
-#             message += f" {target.symbol} убит!"
-
-#         return target_died, message
-
-#     def heal(self, amount):
-#         """Лечение персонажа
-#         Args:
-#             amount: количество здоровья для восстановления
-#         Returns:
-#             int: сколько здоровья реально восстановлено"""
-#         old_hp = self.hp
-#         self.hp = min(self.max_hp, self.hp + amount)
-#         return self.hp - old_hp
-
-#     def upgrade_stats(self, hp_increase=0, damage_increase=0):
-#         """Улучшение характеристик (после убийства врага)
-#         Args:
-#             hp_increase: увеличение максимального здоровья
-#             damage_increase: увеличение силы атаки"""
-#         if hp_increase > 0: 
-#             self.max_hp += hp_increase
-#             self.hp += hp_increase  # также восстанавливаем здоровье
-
-#         if damage_increase > 0:
-#             self.attack_damage += damage_increase
-
-#     def is_alive(self):
-#         """Проверка, жив ли персонаж"""
-#         return self.alive
-
-#     def get_position(self):
-#         """Получить текущую позицию"""
-#         return (self.x, self.y)
-
-#     def distance_to(self, other):
-#         """Расстояние до другого персонажа (Манхэттенское)"""
-#         return abs(self.x - other.x) + abs(self.y - other.y)
-
-
-# class Person(Player):
-#     """Класс игрока (без системы опыта)"""
-#     def __init__(self, x = 1, y = 1):
-#         # Игрок: символ '@', 100 HP, 5 урона
-#         super().__init__('@', max_hp = 100, attack_damage = 5, x=x, y=y)
-
-#     def __str__(self):
-#         """Отображение игрока"""
-#         return f"Player {self.symbol} HP:{self.hp}/{self.max_hp} ATK:{self.attack_damage}"
-
-
-# class Enemy(Player):
-#     """Класс врага"""
-#     def __init__(self, x=1, y=1):
-#         # Враг: символ 'Z', 50 HP, 3 урона
-#         super().__init__('Z', max_hp = 50, attack_damage = 3, x=x, y=y)
-
-#     def move_towards_player(self, player_x, player_y, MAP):
-#         """Движение в сторону игрока
-#         Args:
-#             player_x: X координата игрока
-#             player_y: Y координата игрока
-#             MAP: объект карты для проверки проходимости
-#         Returns:
-#             bool: удалось ли сдвинуться"""
-
-#         # Сначала пытаемся двигаться по горизонтали
-#         if self.x < player_x:
-#             # Игрок справа - двигаемся вправо
-#             new_x = self.x + 1
-#             new_y = self.y
-#         elif self.x > player_x:
-#             # Игрок слева - двигаемся влево
-#             new_x = self.x - 1
-#             new_y = self.y
-#         else:
-#             # По горизонтали уже на одной линии
-#             new_x = self.x
-#             new_y = self.y
-
-#             # Пытаемся двигаться по вертикали
-#             if self.y < player_y:
-#                 new_y = self.y + 1
-#             elif self.y > player_y:
-#                 new_y = self.y - 1
-
-#         # Проверяем, можно ли пройти в выбранную клетку
-#         if 0 <= new_x < MAP.width and 0 <= new_y < MAP.height:
-#             if MAP.tiles[new_y][new_x].walkable:
-#                 self.move(new_x, new_y)
-#                 return True
-
-#         # Если не получилось, пробуем другое направление
-#         # Пробуем вертикальное движение
-#         if self.y < player_y:
-#             new_x = self.x
-#             new_y = self.y + 1
-#         elif self.y > player_y:
-#             new_x = self.x
-#             new_y = self.y - 1
-#         else:
-#             # Пробуем горизонтальное движение (если вертикаль не подошла)
-#             if self.x < player_x:
-#                 new_x = self.x + 1
-#                 new_y = self.y
-#             elif self.x > player_x:
-#                 new_x = self.x - 1
-#                 new_y = self.y
-#             else:
-#                 return False  # Не можем двигаться
-
-#         # Проверяем второе направление
-#         if 0 <= new_x < MAP.width and 0 <= new_y < MAP.height:
-#             if MAP.tiles[new_y][new_x].walkable:
-#                 self.move(new_x, new_y)
-#                 return True
-
-#         return False  # Никуда не можем двинуться
-
-#     def __str__(self):
-#         """Отображение врага"""
-#         return f"Enemy {self.symbol} HP:{self.hp}/{self.max_hp} ATK:{self.attack_damage}"
-
-    #функция, которая создаёт монстров в фиксированном значении
-    @classmethod
-    def generation_mobs(cls, count, MAP):
-        lst_mob = []
-        for i in range(count):
-            cls.health = random.randint(10, 50)
-            x = random.randint(1, MAP.width - 2)
-            y = random.randint(1, MAP.height - 2)
-            lst_mob.append(cls(cls.health, y, x))
-        return lst_mob
 
 # нужно 5 мобов
 p = Person(14, 15)
