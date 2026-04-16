@@ -52,7 +52,7 @@ class GameInterface:
         lines.append(f'врагов: {len(enemy_life)}')
 
         for i, e in enumerate(enemy_life):
-            lines.append(f'враг{i + 1}, hp: {e.health}')
+            lines.append(f'враг{i + 1}, hp: {e.hp}')
 
         lines.append(f'зелий: {len(self.items)}')
         return lines

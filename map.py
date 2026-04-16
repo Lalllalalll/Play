@@ -49,6 +49,8 @@ class Map:
                     object.y = y
                     if object.is_enemy:
                         self.enemies.append(object)
+                    elif object.is_it:
+                        self.item.append(object)
                     else:
                         self.item.append(object)
                     plased = True
@@ -76,40 +78,19 @@ class Map:
                     break
 
     #функция, которая проверяет границы
-    def is_valid_move(self, x, y):
-        if not (0 <= x < self.width and 0 <= y < self.height):
+    @staticmethod
+    def is_valid_move(x, y, MAP):
+        if not (0 <= x < MAP.width and 0 <= y < MAP.height):
             return False
         return True
 
-    #функция стирания координат зелек
-    def deletion(self):
-        for it in self.item[:]: 
-            if it.x == self.player.x and it.y == self.player.y:
-                self.player.heal(amount = 10)
-                self.dungeon[it.y, it.x] = '.'
-                self.item.remove(it)
-            else:
-                return
-
-    #движение списка мобов
-    def movement_mob(self):
-        if self.player == None:
-            return
-        for enemy in self.enemies:
-            old_x = enemy.x
-            old_y = enemy.y
-            moved = enemy.move_towards_player(self.player.x, self.player.y, self)
-            if moved:
-                self.dungeon[old_y, old_x] = '.'
-                self.dungeon[enemy.y, enemy.x] = enemy.symbol
-
-
-    #удаление с карты
-    def delection_koord(self, obj):
-        self.dungeon[obj.y, obj.x] = '.' 
+    #удаление координат
+    def delection_player(self, obj):
+        if obj.is_alive() == False:
+            self.dungeon[obj.y, obj.x] = '.'
 
     #нажимаем на w, a, d, s - движение вверх, вправо, влево, вниз
-    def movement_player(self, object):
+    def movement_player(self, object, MAP):
         self.player = object
         alw = True
         while alw == True:
@@ -119,7 +100,7 @@ class Map:
                 case 'w':
                     new_y = self.player.y - 1
                     new_x = self.player.x
-                    if self.is_valid_move(new_x, new_y):
+                    if self.is_valid_move(new_x, new_y, MAP):
                         if self.dungeon[self.player.y-1, self.player.x] == '.':
                             self.dungeon[self.player.y, self.player.x] = '.'
                             self.player.move(new_x, new_y) #обновляем координаты у игрока
@@ -162,8 +143,8 @@ class Map:
     #функция, которая генерирует карту с рандомными width и height
     @classmethod
     def create_map(cls):
-        width = random.randint(10, 30)
-        height = random.randint(45, 60)
+        height = random.randint(10, 30)
+        width = random.randint(45, 60)
         return cls(height, width)
     
 
@@ -176,14 +157,4 @@ class Map:
 #6)Бой в самой карте или как отдельная функция в самой игре? 
 
 
-# нужно 5 мобов
-p = Person(14, 15)
-m = Map(11, 45)
-mobs = Enemy.generation_mobs(15, m)
-m.add_player(p) 
-m.add_something(mobs) 
-m.add_block()
-m.random_wall()
-print(m)  
-#Функция самой игры:
-# вызать карту, отобразить всё на карте, передвижение игрока, убийство зомби, как убили - появляется дверь и игрок проходит в другую комнату(что со старой?)
+
