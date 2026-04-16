@@ -24,6 +24,7 @@ class Entity:
         self.x = new_x
         self.y = new_y
 
+
     #получение урона
     def take_damage(self, damage):
         self.hp -= damage
@@ -108,7 +109,8 @@ class Enemy(Entity):
 
             # Проверяем, можно ли пройти в выбранную клетку
             if 0 <= new_x < MAP.width and 0 <= new_y < MAP.height:
-                if MAP.dungeon[new_y, new_x] == '.':
+                if MAP.dungeon[person.y-1, person.x] != '█' and \
+                    MAP.dungeon[person.y-1, person.x] != '■':
                     self.move(new_x, new_y)
                     return True
 
@@ -133,7 +135,8 @@ class Enemy(Entity):
 
             # Проверяем второе направление
             if 0 <= new_x < MAP.width and 0 <= new_y < MAP.height:
-                if MAP.dungeon[new_y][new_x] == '.':
+                if MAP.dungeon[person.y-1, person.x] != '█' and \
+                    MAP.dungeon[person.y-1, person.x] != '■':
                     self.move(new_x, new_y)
                     return True
 

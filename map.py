@@ -101,7 +101,8 @@ class Map:
                     new_y = self.player.y - 1
                     new_x = self.player.x
                     if self.is_valid_move(new_x, new_y, MAP):
-                        if self.dungeon[self.player.y-1, self.player.x] == '.':
+                        if self.dungeon[self.player.y-1, self.player.x] != '█' and \
+                            self.dungeon[self.player.y-1, self.player.x] != '■':
                             self.dungeon[self.player.y, self.player.x] = '.'
                             self.player.move(new_x, new_y) #обновляем координаты у игрока
                             self.dungeon[new_y, new_x] = self.player.symbol
@@ -110,8 +111,9 @@ class Map:
                 case 'a':
                     new_y = self.player.y
                     new_x = self.player.x + 1
-                    if self.is_valid_move(new_x, new_y):
-                        if self.dungeon[self.player.y, self.player.x + 1] == '.':
+                    if self.is_valid_move(new_x, new_y, MAP):
+                        if self.dungeon[self.player.y-1, self.player.x] != '█' and \
+                            self.dungeon[self.player.y-1, self.player.x] != '■':
                             self.dungeon[self.player.y, self.player.x] = '.'
                             self.player.move(new_x, new_y)
                             self.dungeon[new_y, new_x] = self.player.symbol
@@ -120,8 +122,9 @@ class Map:
                 case 'd':
                     new_y = self.player.y
                     new_x = self.player.x - 1
-                    if self.is_valid_move(new_x, new_y):
-                        if self.dungeon[self.player.y, self.player.x - 1] == '.':
+                    if self.is_valid_move(new_x, new_y, MAP):
+                        if self.dungeon[self.player.y-1, self.player.x] != '█' and \
+                            self.dungeon[self.player.y-1, self.player.x] != '■':
                             self.dungeon[self.player.y, self.player.x] = '.'
                             self.player.move(new_x, new_y)
                             self.dungeon[new_y, new_x] = self.player.symbol
@@ -130,8 +133,9 @@ class Map:
                 case 's':
                     new_y = self.player.y + 1
                     new_x = self.player.x
-                    if self.is_valid_move(new_x, new_y):
-                        if self.dungeon[self.player.y + 1, self.player.x] == '.':
+                    if self.is_valid_move(new_x, new_y, MAP):
+                        if self.dungeon[self.player.y-1, self.player.x] != '█' and \
+                            self.dungeon[self.player.y-1, self.player.x] != '■':
                             self.dungeon[self.player.y, self.player.x] = '.'
                             self.player.move(new_x, new_y)
                             self.dungeon[new_y, new_x] = self.player.symbol
