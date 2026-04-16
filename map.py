@@ -80,18 +80,6 @@ class Map:
         if not (0 <= x < self.width and 0 <= y < self.height):
             return False
         return True
-    
-    #бой персонажа, стирание координат, если моб или персон умер 
-    def battle_p_e(self):
-        for enem in self.enemies[:]:
-            if enem.x == self.player.x and enem.y == self.player.y:
-                enem.attack(self.player)
-                self.player.attack(enem)
-                if enem.is_alive() == False:
-                    self.delection_player(enem)
-                    self.enemies.remove(enem)
-                if self.player.is_alive() == False:
-                    self.delection_player(self.player)
 
     #функция стирания координат зелек
     def deletion(self):
@@ -116,12 +104,9 @@ class Map:
                 self.dungeon[enemy.y, enemy.x] = enemy.symbol
 
 
-    #удаление мёртвых игроков
-    def delection_player(self, obj):
-        if obj.is_alive() == False:
-            self.dungeon[obj.y, obj.x] = '.' 
-        else:
-            return
+    #удаление с карты
+    def delection_koord(self, obj):
+        self.dungeon[obj.y, obj.x] = '.' 
 
     #нажимаем на w, a, d, s - движение вверх, вправо, влево, вниз
     def movement_player(self, object):
