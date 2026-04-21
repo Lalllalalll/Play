@@ -105,60 +105,52 @@ class Map:
         alw = True
         while alw == True:
             c = self.get_key() #w, a, d, s
-            object.get_position() #получение координат
+
+            if c == None:
+                continue
+
+            old_y = self.player.y
+            old_x = self.player.x
+
+
             match c: #object.x, object.y
                 case 'w':
                     new_y = self.player.y - 1
                     new_x = self.player.x
-                    if self.is_valid_move(new_x, new_y, MAP):
-                        if self.dungeon[self.player.y-1, self.player.x] != '█' and \
-                            self.dungeon[self.player.y-1, self.player.x] != '■':
-                            self.dungeon[self.player.y, self.player.x] = '.'
-                            self.player.move(new_x, new_y) #обновляем координаты у игрока
-                            self.dungeon[new_y, new_x] = self.player.symbol
-                            alw = False
 
                 case 'a':
-                    new_y = self.player.y
                     new_x = self.player.x - 1
-                    if self.is_valid_move(new_x, new_y, MAP):
-                        if self.dungeon[self.player.y, self.player.x-1] != '█' and \
-                            self.dungeon[self.player.y, self.player.x-1] != '■':
-                            self.dungeon[self.player.y, self.player.x] = '.'
-                            self.player.move(new_x, new_y)
-                            self.dungeon[new_y, new_x] = self.player.symbol
-                            alw = False
+                    new_y = self.player.y
 
                 case 'd':
-                    new_y = self.player.y
                     new_x = self.player.x + 1
-                    if self.is_valid_move(new_x, new_y, MAP):
-                        if self.dungeon[self.player.y, self.player.x+1] != '█' and \
-                            self.dungeon[self.player.y, self.player.x+1] != '■':
-                            self.dungeon[self.player.y, self.player.x] = '.'
-                            self.player.move(new_x, new_y)
-                            self.dungeon[new_y, new_x] = self.player.symbol
-                            alw = False
+                    new_y = self.player.y
 
                 case 's':
                     new_y = self.player.y + 1
                     new_x = self.player.x
-                    if self.is_valid_move(new_x, new_y, MAP):
-                        if self.dungeon[self.player.y+1, self.player.x] != '█' and \
-                            self.dungeon[self.player.y+1, self.player.x] != '■':
-                            self.dungeon[self.player.y, self.player.x] = '.'
-                            self.player.move(new_x, new_y)
-                            self.dungeon[new_y, new_x] = self.player.symbol
-                            alw = False
+
                 case '':
                     alw = False
-
+                
+            if self.is_valid_move(new_x, new_y, MAP):
+                if self.dungeon[new_y, new_x] != '█' and self.dungeon[new_y, new_x] != '■':
+                    if self.dungeon[new_y, new_x] != 'Z':
+                        self.dungeon[old_y, old_x] = '.'
+                        self.player.move(new_x, new_y) #обновляем координаты у игрока
+                        self.dungeon[new_y, new_x] = self.player.symbol
+                        alw = False
+                    else:
+                        self.dungeon[old_y, old_x] = '.'
+                        self.player.move(new_x, new_y) #обновляем координаты у игрока
+                        self.dungeon[new_y, new_x] = '┼'
+                        alw = False
 
     #функция, которая генерирует карту с рандомными width и height
     @classmethod
     def create_map(cls):
         height = random.randint(15, 25)
-        width = random.randint(25, 35)
+        width = random.randint(30, 40)
         return cls(height, width)
     
 

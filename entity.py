@@ -47,11 +47,6 @@ class Entity:
     #Расстояние до другого персонажа
     def distance_to(self, other):
         return abs(self.x - other.x) + abs(self.y - other.y)
-    
-    #текущая позиция
-    def get_position(self):
-        return (self.x, self.y)
-
 
 class Person(Entity):
     def __init__(self, x = 1, y = 1):
@@ -85,7 +80,7 @@ class Enemy(Entity):
 
     #Движение в сторону игрока
     def move_towards_player(self, person, MAP):
-        if self.distance_to(person) <= 2:
+        if self.distance_to(person) <= 1:
             return False
         
         if self.distance_to(person) > 5:
@@ -114,11 +109,12 @@ class Enemy(Entity):
         # Проверяем, можно ли пройти в выбранную клетку
         if 0 <= new_x < MAP.width and 0 <= new_y < MAP.height:
             if MAP.dungeon[new_y, new_x] != '█' and \
-                MAP.dungeon[new_y, new_x] != '■':
-                MAP.dungeon[self.y, self.x] = '.'
-                self.move(new_x, new_y)
-                MAP.dungeon[ new_y, new_x] = self.symbol
-                return True
+                MAP.dungeon[new_y, new_x] != '■' and MAP.dungeon[new_y, new_x] != 'Z' \
+                    and MAP.dungeon[new_y, new_x] != '┼':
+                    MAP.dungeon[self.y, self.x] = '.'
+                    self.move(new_x, new_y)
+                    MAP.dungeon[ new_y, new_x] = self.symbol
+                    return True
 
         # Если не получилось, пробуем другое направление
         # Пробуем вертикальное движение
@@ -142,8 +138,9 @@ class Enemy(Entity):
         #Проверяем второе направление
         if 0 <= new_x < MAP.width and 0 <= new_y < MAP.height:
             if MAP.dungeon[new_y, new_x] != '█' and \
-                MAP.dungeon[new_y, new_x] != '■':
-                MAP.dungeon[self.y, self.x] = '.'
-                self.move(new_x, new_y)
-                MAP.dungeon[ new_y, new_x] = self.symbol
-                return True
+                MAP.dungeon[new_y, new_x] != '■' and MAP.dungeon[new_y, new_x] != 'Z' \
+                    and MAP.dungeon[new_y, new_x] != '┼':
+                    MAP.dungeon[self.y, self.x] = '.'
+                    self.move(new_x, new_y)
+                    MAP.dungeon[ new_y, new_x] = self.symbol
+                    return True

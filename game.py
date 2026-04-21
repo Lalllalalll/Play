@@ -2,6 +2,7 @@ from map import Map
 from items import HealthIt
 from entity import Person, Enemy
 from intercface import GameInterface
+import time
 import random
 
 class Game:
@@ -23,6 +24,7 @@ class Game:
     def battle_p_e(self, player, enemy_l, map, interface):
         for enem in enemy_l[:]:
             if enem.x == player.x and enem.y == player.y:
+                map.dungeon[player.y, player.x] = "┼"
 
                 player.attack(enem)
 
@@ -47,7 +49,11 @@ class Game:
     def movement_mob(self, enemy_l, player, map):
         if player == None:
             return
+        
         for enemy in enemy_l:
+            if enemy.x == player.x and enemy.y == player.y:
+                continue
+
             old_x = enemy.x
             old_y = enemy.y
             moved = enemy.move_towards_player(player, map) #вернёт True или False
@@ -55,7 +61,8 @@ class Game:
                 for _ in range(10): #10 попыток
                     new_x = random.randint(enemy.x-1, enemy.x+1)
                     new_y = random.randint(enemy.y-1, enemy.y+1)
-                    if map.dungeon[new_y, new_x] != '■' and map.dungeon[new_y, new_x] != '█':
+                    if map.dungeon[new_y, new_x] != '■' and map.dungeon[new_y, new_x] != '█' \
+                    and map.dungeon[new_y, new_x] != '┼':
                         map.dungeon[old_y, old_x] = '.'
                         enemy.move(new_x, new_y)
                         map.dungeon[new_y, new_x] = enemy.symbol
@@ -67,7 +74,7 @@ class Game:
         for it in item_l[:]: 
             if it.x == player.x and it.y == player.y:
                 player.heal(amount = 10)
-                # map.dungeon[it.y, it.x] = '.'
+                map.dungeon[it.y, it.x] = '@'
                 item_l.remove(it)
 
     #игра
@@ -123,12 +130,7 @@ class Game:
                 # Проверка ПОБЕДЫ вообще
                 if not p.is_alive():
                     ui.add_log("ВЫ ПОГИБЛИ")
-                    choice = input("Начать уровень заново? (y/n): ")
-                    if choice.lower() == 'y':
-                        self.level = 1
-                        continue  # ← перезапускаем уровень
-                    else:
-                        break  # выходим из игры
+                    break  # выходим из игры
 
         if self.level >= 5:
            print('ВЫ ВЫИГРАЛИ! КРУТЫЕ!')
