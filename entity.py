@@ -109,9 +109,11 @@ class Enemy(Entity):
 
             # Проверяем, можно ли пройти в выбранную клетку
             if 0 <= new_x < MAP.width and 0 <= new_y < MAP.height:
-                if MAP.dungeon[person.y-1, person.x] != '█' and \
-                    MAP.dungeon[person.y-1, person.x] != '■':
+                if MAP.dungeon[new_y, new_x] != '█' and \
+                    MAP.dungeon[new_y, new_x] != '■':
+                    MAP.dungeon[self.y, self.x] = '.'
                     self.move(new_x, new_y)
+                    MAP.dungeon[ new_y, new_x] = self.symbol
                     return True
 
             # Если не получилось, пробуем другое направление
@@ -135,9 +137,11 @@ class Enemy(Entity):
 
             # Проверяем второе направление
             if 0 <= new_x < MAP.width and 0 <= new_y < MAP.height:
-                if MAP.dungeon[person.y-1, person.x] != '█' and \
-                    MAP.dungeon[person.y-1, person.x] != '■':
+                if MAP.dungeon[new_y, new_x] != '█' and \
+                    MAP.dungeon[new_y, new_x] != '■':
+                    MAP.dungeon[self.y, self.x] = '.'
                     self.move(new_x, new_y)
+                    MAP.dungeon[ new_y, new_x] = self.symbol
                     return True
 
         return False  # Никуда не можем двинуться

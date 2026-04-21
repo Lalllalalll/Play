@@ -1,6 +1,7 @@
 import numpy as np
 import random
 from entity import Person, Enemy
+import keyboard as key
 
 class Map:
     def __init__(self, height, width):
@@ -94,8 +95,8 @@ class Map:
         self.player = object
         alw = True
         while alw == True:
-            c = input() #w, a, d, s
-            object.get_position()
+            c = key.read_key() #w, a, d, s
+            object.get_position() #получение координат
             match c: #object.x, object.y
                 case 'w':
                     new_y = self.player.y - 1
@@ -110,10 +111,10 @@ class Map:
 
                 case 'a':
                     new_y = self.player.y
-                    new_x = self.player.x + 1
+                    new_x = self.player.x - 1
                     if self.is_valid_move(new_x, new_y, MAP):
-                        if self.dungeon[self.player.y-1, self.player.x] != '█' and \
-                            self.dungeon[self.player.y-1, self.player.x] != '■':
+                        if self.dungeon[self.player.y, self.player.x-1] != '█' and \
+                            self.dungeon[self.player.y, self.player.x-1] != '■':
                             self.dungeon[self.player.y, self.player.x] = '.'
                             self.player.move(new_x, new_y)
                             self.dungeon[new_y, new_x] = self.player.symbol
@@ -121,10 +122,10 @@ class Map:
 
                 case 'd':
                     new_y = self.player.y
-                    new_x = self.player.x - 1
+                    new_x = self.player.x + 1
                     if self.is_valid_move(new_x, new_y, MAP):
-                        if self.dungeon[self.player.y-1, self.player.x] != '█' and \
-                            self.dungeon[self.player.y-1, self.player.x] != '■':
+                        if self.dungeon[self.player.y, self.player.x+1] != '█' and \
+                            self.dungeon[self.player.y, self.player.x+1] != '■':
                             self.dungeon[self.player.y, self.player.x] = '.'
                             self.player.move(new_x, new_y)
                             self.dungeon[new_y, new_x] = self.player.symbol
@@ -134,8 +135,8 @@ class Map:
                     new_y = self.player.y + 1
                     new_x = self.player.x
                     if self.is_valid_move(new_x, new_y, MAP):
-                        if self.dungeon[self.player.y-1, self.player.x] != '█' and \
-                            self.dungeon[self.player.y-1, self.player.x] != '■':
+                        if self.dungeon[self.player.y+1, self.player.x] != '█' and \
+                            self.dungeon[self.player.y+1, self.player.x] != '■':
                             self.dungeon[self.player.y, self.player.x] = '.'
                             self.player.move(new_x, new_y)
                             self.dungeon[new_y, new_x] = self.player.symbol
@@ -147,8 +148,8 @@ class Map:
     #функция, которая генерирует карту с рандомными width и height
     @classmethod
     def create_map(cls):
-        height = random.randint(10, 30)
-        width = random.randint(45, 60)
+        height = random.randint(15, 25)
+        width = random.randint(30, 40)
         return cls(height, width)
     
 

@@ -3,8 +3,6 @@ from items import HealthIt
 from entity import Person, Enemy
 from intercface import GameInterface
 import random
-
-
 class Game:
 
     def __init__(self):
@@ -44,17 +42,24 @@ class Game:
         for enemy in enemy_l:
             old_x = enemy.x
             old_y = enemy.y
-            moved = enemy.move_towards_player(player, map)
-            if moved:
-                map.dungeon[old_y, old_x] = '.'
-                map.dungeon[enemy.y, enemy.x] = enemy.symbol
-        
+            moved = enemy.move_towards_player(player, map) #вернёт True или False
+            if not moved:
+                for _ in range(10): #10 попыток
+                    new_x = random.randint(enemy.x-1, enemy.x+1)
+                    new_y = random.randint(enemy.y-1, enemy.y+1)
+                    if map.dungeon[new_y, new_x] != '■' and map.dungeon[new_y, new_x] != '█':
+                        map.dungeon[old_y, old_x] = '.'
+                        enemy.move(new_x, new_y)
+                        map.dungeon[new_y, new_x] = enemy.symbol
+                        break
+
+            
     #функция поглощения зелья
     def eat_z(self, item_l, player, map):
         for it in item_l[:]: 
             if it.x == player.x and it.y == player.y:
                 player.heal(amount = 10)
-                map.dungeon[it.y, it.x] = '.'
+                # map.dungeon[it.y, it.x] = '.'
                 item_l.remove(it)
 
     #игра
@@ -72,7 +77,7 @@ class Game:
             MAP.add_player(p)
 
             #создаём мобов
-            mobs = Game.generation_obj(Enemy, 10, MAP)
+            mobs = Game.generation_obj(Enemy, 5, MAP)
             MAP.add_something(mobs)
 
             #создаём зелья
@@ -118,7 +123,9 @@ try:
 except Exception as e: #работает с любыми ошибками
     print(f'Произошла ошибка: {e}')
 
-
+# Ошибки:
+# 1)Персонаж и зомби сливаются в одно
+# 2)Подредактировать цикл, чтобы хп и навыки оставались одними и теми же
 
 # Карта:
 # 1)#функция, которая добавляет персонажа в рандомную позицию
