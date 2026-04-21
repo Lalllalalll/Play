@@ -1,6 +1,7 @@
 import os
 from map import Map
 from entity import Person, Enemy
+
 class GameInterface:
     def __init__(self, game_map, player, enemies, items):
         self.map = game_map
@@ -44,6 +45,7 @@ class GameInterface:
         lines.append('')
         lines.append('== ХАРАКТЕРИСТИКИ ==')
         lines.append(f'hp: {self.player.hp}/{self.player.max_hp}')
+        lines.append(f'атака: {self.player.attack_damage}')
 
         enemy_life = []
         for e in self.enemy:
@@ -65,7 +67,7 @@ class GameInterface:
             'w/a/s/d - движение',
             '---- ПРАВИЛА ----',
             '1. убей всех зомби',
-            '2. возьми зелье(8)',
+            '2. возьми зелье(&)',
             'для лечения',
             '3. с врагом на клетке -',
             'бой',
@@ -86,16 +88,20 @@ class GameInterface:
             right_lines.append('')
 
         #делаем рамку
-        col_width = 25 
-        print('┌' + '─' * (col_width * 3 + 2) + '┐')
+        # вычисляем ширину каждой колонки
+        left_width = max(len(line) for line in left_lines) + 2
+        map_width = max(len(line) for line in map_lines) if map_lines else 20
+        right_width = max(len(line) for line in right_lines) + 2
 
+        total_width = left_width + map_width + right_width + 4
+        print('┌' + '─' * total_width + '┐')
 
-        for w in range(0, max_h):
+        for w in range(max_h):
             left = left_lines[w]
             center = map_lines[w]
             right = right_lines[w]
-            print(f'|{left:<{col_width}}|{center:<{col_width}}|{right:<{col_width}}|')
+            print(f'| {left:<{left_width - 1}}|{center:<{map_width}}|  {right:<{right_width - 1}} |')
 
-        print('└' + '─' * (col_width * 3 + 2) + '┘')
+        print('└' + '─' * total_width + '┘')
 
 

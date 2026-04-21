@@ -3,11 +3,11 @@ from items import HealthIt
 from entity import Person, Enemy
 from intercface import GameInterface
 import random
+
 class Game:
 
     def __init__(self):
         self.level = 1
-        self.running = True
 
     #создание списка мобов
     @staticmethod
@@ -23,16 +23,24 @@ class Game:
     def battle_p_e(self, player, enemy_l, map, interface):
         for enem in enemy_l[:]:
             if enem.x == player.x and enem.y == player.y:
-                enem.attack(player)
+
                 player.attack(enem)
-                if enem.is_alive() == False:
+
+                if not enem.is_alive():
                     map.delection_player(enem)
                     enemy_l.remove(enem)
                     interface.add_log("Зомби погиб!")
-                    player.upgrade_stats(10, 5) #улучшаем характеристики
-                if player.is_alive() == False:
+                    player.upgrade_stats(5, 2) #улучшаем характеристики
+
+                    map.dungeon[player.y, player.x] = player.symbol
+                    continue
+
+                enem.attack(player)
+
+                if not player.is_alive():
                     map.delection_player(player)
                     interface.add_log("СТОП ИГРА. Вы погибли!")
+                    return #сразу же прекращаем работу
                     
 
     #движение списка мобов
@@ -64,17 +72,21 @@ class Game:
 
     #игра
     def run(self):
+        #создаём персонажа
+        p = Person(14, 5)
 
-        while self.level <= 5 and self.running: #если True
+        while self.level <= 5: #если True
+
+            #очищаем списки предыдущих запусков
+            mobs = None
+            items = None
+            MAP = None
 
             #создаём карту
             MAP = Map.create_map()
             MAP.add_block()
             MAP.random_wall()
-
-            #создаём персонажа
-            p = Person(14, 5)
-            MAP.add_player(p)
+            MAP.add_player(p) #добавляем персонажа на карту
 
             #создаём мобов
             mobs = Game.generation_obj(Enemy, 5, MAP)
@@ -93,6 +105,9 @@ class Game:
                 ui.draw()
 
                 MAP.movement_player(p, MAP) #движение игрока, потом мобов
+
+                self.battle_p_e(p, mobs, MAP, ui) #бой
+
                 self.movement_mob(mobs, p, MAP)
 
                 self.battle_p_e(p, mobs, MAP, ui) #бой
@@ -124,8 +139,8 @@ except Exception as e: #работает с любыми ошибками
     print(f'Произошла ошибка: {e}')
 
 # Ошибки:
-# 1)Персонаж и зомби сливаются в одно
-# 2)Подредактировать цикл, чтобы хп и навыки оставались одними и теми же
+# 1)Персонаж и зомби сливаются в одно, потом зомби погибает и получается пустота
+# 2)Персонаж слишком сильный, его не получается убить
 
 # Карта:
 # 1)#функция, которая добавляет персонажа в рандомную позицию

@@ -1,7 +1,7 @@
 import numpy as np
 import random
 from entity import Person, Enemy
-import keyboard as key
+import msvcrt
 
 class Map:
     def __init__(self, height, width):
@@ -90,12 +90,21 @@ class Map:
         if obj.is_alive() == False:
             self.dungeon[obj.y, obj.x] = '.'
 
+    #возращает нажатую клавишу или ничего БЕЗ enter
+    @staticmethod
+    def get_key():
+        if msvcrt.kbhit(): #True, если клавиша нажата
+            key = msvcrt.getch().decode('utf-8') #getch() возвращает байты символа, превращаем их в строку
+            #utf-8 - таблица, содержащяя все символы и их байты
+            return key
+        return None
+
     #нажимаем на w, a, d, s - движение вверх, вправо, влево, вниз
     def movement_player(self, object, MAP):
         self.player = object
         alw = True
         while alw == True:
-            c = key.read_key() #w, a, d, s
+            c = self.get_key() #w, a, d, s
             object.get_position() #получение координат
             match c: #object.x, object.y
                 case 'w':
@@ -149,7 +158,7 @@ class Map:
     @classmethod
     def create_map(cls):
         height = random.randint(15, 25)
-        width = random.randint(30, 40)
+        width = random.randint(25, 35)
         return cls(height, width)
     
 

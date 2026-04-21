@@ -24,7 +24,6 @@ class Entity:
         self.x = new_x
         self.y = new_y
 
-
     #получение урона
     def take_damage(self, damage):
         self.hp -= damage
@@ -57,11 +56,11 @@ class Entity:
 class Person(Entity):
     def __init__(self, x = 1, y = 1):
         # Игрок: символ '@', 100 HP, 5 урона
-        super().__init__('@', max_hp = 100, attack_damage = 5, x=x, y=y)
+        super().__init__('@', max_hp = 60, attack_damage = 5, x=x, y=y)
         self.is_enemy = False
     
     #лечение
-    def heal(self, amount = 20):
+    def heal(self, amount = 10):
         old_hp = self.hp
         self.hp = min(self.max_hp, self.hp + amount)
         return self.hp - old_hp
@@ -80,68 +79,71 @@ class Person(Entity):
 class Enemy(Entity):
     def __init__(self, x=1, y=1):
         # Враг: символ 'Z', 50 HP, 3 урона
-        health = random.randint(20,70)
-        super().__init__('Z', health, attack_damage = 3, x=x, y=y)
+        health = random.randint(20, 40)
+        super().__init__('Z', health, attack_damage = 5, x=x, y=y)
         self.is_enemy = True
 
     #Движение в сторону игрока
     def move_towards_player(self, person, MAP):
-        if self.distance_to(person) <= 5:
-            # Сначала пытаемся двигаться по горизонтали
+        if self.distance_to(person) <= 2:
+            return False
+        
+        if self.distance_to(person) > 5:
+            return False
+        
+        # Сначала пытаемся двигаться по горизонтали
+        if self.x < person.x:
+            # Игрок справа - двигаемся вправо
+            new_x = self.x + 1
+            new_y = self.y
+        elif self.x > person.x:
+            # Игрок слева - двигаемся влево
+            new_x = self.x - 1
+            new_y = self.y
+        else:
+            # По горизонтали уже на одной линии
+            new_x = self.x
+            new_y = self.y
+
+            # Пытаемся двигаться по вертикали
+            if self.y < person.y:
+                new_y = self.y + 1
+            elif self.y > person.y:
+                new_y = self.y - 1
+
+        # Проверяем, можно ли пройти в выбранную клетку
+        if 0 <= new_x < MAP.width and 0 <= new_y < MAP.height:
+            if MAP.dungeon[new_y, new_x] != '█' and \
+                MAP.dungeon[new_y, new_x] != '■':
+                MAP.dungeon[self.y, self.x] = '.'
+                self.move(new_x, new_y)
+                MAP.dungeon[ new_y, new_x] = self.symbol
+                return True
+
+        # Если не получилось, пробуем другое направление
+        # Пробуем вертикальное движение
+        if self.y < person.y:
+            new_x = self.x
+            new_y = self.y + 1
+        elif self.y > person.y:
+            new_x = self.x
+            new_y = self.y - 1
+        else:
+            # Пробуем горизонтальное движение (если вертикаль не подошла)
             if self.x < person.x:
-                # Игрок справа - двигаемся вправо
                 new_x = self.x + 1
                 new_y = self.y
             elif self.x > person.x:
-                # Игрок слева - двигаемся влево
                 new_x = self.x - 1
                 new_y = self.y
             else:
-                # По горизонтали уже на одной линии
-                new_x = self.x
-                new_y = self.y
+                return False  # Не можем двигаться
 
-                # Пытаемся двигаться по вертикали
-                if self.y < person.y:
-                    new_y = self.y + 1
-                elif self.y > person.y:
-                    new_y = self.y - 1
-
-            # Проверяем, можно ли пройти в выбранную клетку
-            if 0 <= new_x < MAP.width and 0 <= new_y < MAP.height:
-                if MAP.dungeon[new_y, new_x] != '█' and \
-                    MAP.dungeon[new_y, new_x] != '■':
-                    MAP.dungeon[self.y, self.x] = '.'
-                    self.move(new_x, new_y)
-                    MAP.dungeon[ new_y, new_x] = self.symbol
-                    return True
-
-            # Если не получилось, пробуем другое направление
-            # Пробуем вертикальное движение
-            if self.y < person.y:
-                new_x = self.x
-                new_y = self.y + 1
-            elif self.y > person.y:
-                new_x = self.x
-                new_y = self.y - 1
-            else:
-                # Пробуем горизонтальное движение (если вертикаль не подошла)
-                if self.x < person.x:
-                    new_x = self.x + 1
-                    new_y = self.y
-                elif self.x > person.x:
-                    new_x = self.x - 1
-                    new_y = self.y
-                else:
-                    return False  # Не можем двигаться
-
-            # Проверяем второе направление
-            if 0 <= new_x < MAP.width and 0 <= new_y < MAP.height:
-                if MAP.dungeon[new_y, new_x] != '█' and \
-                    MAP.dungeon[new_y, new_x] != '■':
-                    MAP.dungeon[self.y, self.x] = '.'
-                    self.move(new_x, new_y)
-                    MAP.dungeon[ new_y, new_x] = self.symbol
-                    return True
-
-        return False  # Никуда не можем двинуться
+        #Проверяем второе направление
+        if 0 <= new_x < MAP.width and 0 <= new_y < MAP.height:
+            if MAP.dungeon[new_y, new_x] != '█' and \
+                MAP.dungeon[new_y, new_x] != '■':
+                MAP.dungeon[self.y, self.x] = '.'
+                self.move(new_x, new_y)
+                MAP.dungeon[ new_y, new_x] = self.symbol
+                return True
