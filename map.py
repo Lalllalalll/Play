@@ -104,6 +104,8 @@ class Map:
         self.player = object
         alw = True
         while alw == True:
+            if not self.player.is_alive():
+                return
             c = self.get_key() #w, a, d, s
 
             if c == None:

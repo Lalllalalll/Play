@@ -51,7 +51,7 @@ class Entity:
 class Person(Entity):
     def __init__(self, x = 1, y = 1):
         # Игрок: символ '@', 100 HP, 5 урона
-        super().__init__('@', max_hp = 60, attack_damage = 5, x=x, y=y)
+        super().__init__('@', max_hp = 50, attack_damage = 5, x=x, y=y)
         self.is_enemy = False
     
     #лечение
@@ -110,7 +110,7 @@ class Enemy(Entity):
         if 0 <= new_x < MAP.width and 0 <= new_y < MAP.height:
             if MAP.dungeon[new_y, new_x] != '█' and \
                 MAP.dungeon[new_y, new_x] != '■' and MAP.dungeon[new_y, new_x] != 'Z' \
-                    and MAP.dungeon[new_y, new_x] != '┼':
+                    and MAP.dungeon[new_y, new_x] != '┼' and MAP.dungeon[new_y, new_x] != '&':
                     MAP.dungeon[self.y, self.x] = '.'
                     self.move(new_x, new_y)
                     MAP.dungeon[ new_y, new_x] = self.symbol
@@ -139,7 +139,7 @@ class Enemy(Entity):
         if 0 <= new_x < MAP.width and 0 <= new_y < MAP.height:
             if MAP.dungeon[new_y, new_x] != '█' and \
                 MAP.dungeon[new_y, new_x] != '■' and MAP.dungeon[new_y, new_x] != 'Z' \
-                    and MAP.dungeon[new_y, new_x] != '┼':
+                    and MAP.dungeon[new_y, new_x] != '┼' and MAP.dungeon[new_y, new_x] != '&':
                     MAP.dungeon[self.y, self.x] = '.'
                     self.move(new_x, new_y)
                     MAP.dungeon[ new_y, new_x] = self.symbol

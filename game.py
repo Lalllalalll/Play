@@ -9,6 +9,7 @@ class Game:
 
     def __init__(self):
         self.level = 1
+        self.z_attacked = False #проверка на то, походил ли зомби
 
     #создание списка мобов
     @staticmethod
@@ -32,22 +33,23 @@ class Game:
                     map.delection_player(enem)
                     enemy_l.remove(enem)
                     interface.add_log("Зомби погиб!")
-                    player.upgrade_stats(5, 2) #улучшаем характеристики
+                    player.upgrade_stats(5, 1) #улучшаем характеристики
 
                     map.dungeon[player.y, player.x] = player.symbol
-                    continue
+                    continue #прерывает итерацию цикла
 
-                enem.attack(player)
+                if not self.z_attacked:
+                    enem.attack(player)
+                    self.z_attacked = True
 
                 if not player.is_alive():
                     map.delection_player(player)
-                    interface.add_log("СТОП ИГРА. Вы погибли!")
                     return #сразу же прекращаем работу
                     
 
     #движение списка мобов
     def movement_mob(self, enemy_l, player, map):
-        if player == None:
+        if player == None or not player.is_alive():
             return
         
         for enemy in enemy_l:
@@ -62,7 +64,7 @@ class Game:
                     new_x = random.randint(enemy.x-1, enemy.x+1)
                     new_y = random.randint(enemy.y-1, enemy.y+1)
                     if map.dungeon[new_y, new_x] != '■' and map.dungeon[new_y, new_x] != '█' \
-                    and map.dungeon[new_y, new_x] != '┼':
+                    and map.dungeon[new_y, new_x] != '┼' and map.dungeon[new_y, new_x] != '&':
                         map.dungeon[old_y, old_x] = '.'
                         enemy.move(new_x, new_y)
                         map.dungeon[new_y, new_x] = enemy.symbol
@@ -74,7 +76,8 @@ class Game:
         for it in item_l[:]: 
             if it.x == player.x and it.y == player.y:
                 player.heal(amount = 10)
-                map.dungeon[it.y, it.x] = '@'
+                if map.dungeon[it.y, it.x] != '┼':
+                    map.dungeon[it.y, it.x] = player.symbol
                 item_l.remove(it)
 
     #игра
@@ -113,11 +116,29 @@ class Game:
 
                 MAP.movement_player(p, MAP) #движение игрока, потом мобов
 
+                if not p.is_alive():  
+                    print("ВЫ ПОГИБЛИ")
+                    return
+
+                self.z_attacked = False 
+
                 self.battle_p_e(p, mobs, MAP, ui) #бой
+
+                if not p.is_alive():  
+                    print("ВЫ ПОГИБЛИ")
+                    return
 
                 self.movement_mob(mobs, p, MAP)
 
+                if not p.is_alive():  
+                    print("ВЫ ПОГИБЛИ")
+                    return
+
                 self.battle_p_e(p, mobs, MAP, ui) #бой
+
+                if not p.is_alive():  
+                    print("ВЫ ПОГИБЛИ")
+                    return
 
                 self.eat_z(items, p, MAP) #собираем зелья
 
@@ -126,11 +147,6 @@ class Game:
                     ui.add_log(f'Вы прошли 1 уровень.')
                     self.level += 1
                     break
-
-                # Проверка ПОБЕДЫ вообще
-                if not p.is_alive():
-                    ui.add_log("ВЫ ПОГИБЛИ")
-                    break  # выходим из игры
 
         if self.level >= 5:
            print('ВЫ ВЫИГРАЛИ! КРУТЫЕ!')
@@ -141,8 +157,7 @@ except Exception as e: #работает с любыми ошибками
     print(f'Произошла ошибка: {e}')
 
 # Ошибки:
-# 1)Персонаж и зомби сливаются в одно, потом зомби погибает и получается пустота
-# 2)Персонаж слишком сильный, его не получается убить
+# 1)Зависания 
 
 # Карта:
 # 1)#функция, которая добавляет персонажа в рандомную позицию
