@@ -22,9 +22,7 @@ class Map:
 
     #функция, которая добавляет персонажа в рандомную позицию
     def add_player(self, object):
-        #ДОРАБОТАТь, что, если свободного пространства НЕТ
         self.player = object
-        count = 0
         plased = False
         for i in range(100): #100 попыток на создание
             x = random.randint(1, self.width-2) #массивы с 0
@@ -40,7 +38,7 @@ class Map:
     def add_something(self, objects_list):
         #ДОРАБОТАТь, что, если свободного пространства НЕТ
         plased = False
-        for object in objects_list[:]: #чтобы можно было убирать элементы, перебираем копию списка, но удаляем из самого списка
+        for object in objects_list:
             for i in range(100): #100 попыток на создание
                 x = random.randint(1, self.width-2) #массивы с 0
                 y = random.randint(1, self.height-2)
@@ -52,14 +50,12 @@ class Map:
                         self.enemies.append(object)
                     elif object.is_it:
                         self.item.append(object)
-                    else:
-                        self.item.append(object)
                     plased = True
                     break
 
     def add_block(self):
         block = '█'
-        self.dungeon[:, 0] = block    # левый край
+        self.dungeon[0, 0] = block    # левый край
         self.dungeon[:, -1] = block   # правый край
         self.dungeon[0, :] = '■'    # верхний край
         self.dungeon[-1, :] = '■'   # нижний край
@@ -106,6 +102,7 @@ class Map:
         while alw == True:
             if not self.player.is_alive():
                 return
+            
             c = self.get_key() #w, a, d, s
 
             if c == None:
